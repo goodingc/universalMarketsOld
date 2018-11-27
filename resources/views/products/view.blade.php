@@ -21,8 +21,18 @@
                     {data: "title"},
                     {data: "pivot.value"},
                     {data: (row) => {
-                        return `<i id="attribute-${row.id}-delete" class="fas fa-minus-circle fa-lg text-danger"></i>`
-                    }},
+                        return `<i id="attribute-${row.id}-delete" class="fas fa-minus-circle fa-lg text-danger"></i>
+                                <a tabindex="0" id="attribute-${row.id}-pop" data-toggle="popover" data-placement="top" data-html="true" data-content="
+                                    <div class='input-group'>
+                                        <input id='attribute-${row.id}-value' type='text' placeholder='New value' value='${row.pivot.value}' class='form-control'>
+                                        <div class='input-group-append'>
+                                            <button id='attribute-${row.id}-edit' class='btn btn-primary'>Save</button>
+                                        </div>
+                                    </div>
+                                " class="ml-auto text-danger"><i class="fas fa-edit fa-lg text-secondary"></i></a>`
+                    },
+                    width: 40,
+                    },
                 ],
             }),
             suppliers: $("#suppliersTable").DataTable({
@@ -55,6 +65,7 @@
                 responsive: true,
                 scrollY: tableHeight,
                 columns: [
+                    {data: "id"},
                     {data: "warehouse_id"},
                     {data: "name"},
                     {data: "pivot.quantity"},
@@ -76,6 +87,20 @@
             $("[id^=attribute][id$=delete]").on("click", function () {
                 product.removeAttribute($(this).attr("id").split("-")[1], (data) => populate(data))
             });
+            $("[id^=attribute][id$=pop]").popover({
+                trigger: "click",
+                boundary: "body"
+            }).on("shown.bs.popover", function () {
+                var that = $(this);
+                var id = $(this).attr("id").split("-")[1];
+                $(`#attribute-${id}-edit`).on("click", function () {
+                    product.editAttribute(id, $(`#attribute-${id}-value`).val(), (data) => {
+                        that.popover("hide");
+                        populate(data);
+                    });
+
+                })
+            })
         });
 
 
@@ -84,7 +109,7 @@
         ProductAttribute.show((attrs)=>{
             var options;
             attrs.forEach((attr)=>{
-                options += `<option value="${attr.id}">${attr.data.title}</option>`;
+                options += `<option value="${attr.id}">${attr.title}</option>`;
             });
             $("#attributesTable_wrapper > .row > .col-sm-12.col-md-7").html(`
                 <div class="input-group mt-2">
@@ -141,35 +166,35 @@
                 input: $("#skuField"),
                 trigger: $("#skuTrigger"),
             }).triggered(function (val) {
-                product.data.sku = val;
+                product.sku = val;
                 product.edit((data) => populate(data));
             }),
             title: new Editor({
                 input: $("#titleField"),
                 trigger: $("#titleTrigger"),
             }).triggered(function (val) {
-                product.data.title = val;
+                product.title = val;
                 product.edit((data) => populate(data));
             }),
             taxRate: new Editor({
                 input: $("#taxRateNameField"),
                 trigger: $("#taxRateTrigger"),
             }).triggered(function (val) {
-                product.data.tax_rate_id = val;
+                product.tax_rate_id = val;
                 product.edit((data) => populate(data));
             }),
             largeLetter: new Editor({
                 input: $("#largeLetterField"),
                 trigger: $("#largeLetterTrigger"),
             }).triggered(function (val) {
-                product.data.large_letter_compatible = $("#largeLetterField").is(":checked")?1:0;
+                product.large_letter_compatible = $("#largeLetterField").is(":checked")?1:0;
                 product.edit((data) => populate(data));
             }),
             packagingType: new Editor({
                 input: $("#packagingTypeField"),
                 trigger: $("#packagingTypeTrigger"),
             }).triggered(function (val) {
-                product.data.packaging_type = val;
+                product.packaging_type = val;
                 product.edit((data) => populate(data));
             })
         };
@@ -405,6 +430,7 @@
                         <table id="inventoryBaysTable" class="table table-striped">
                             <thead>
                             <tr>
+                                <th scope="col">ID</th>
                                 <th scope="col">Warehouse</th>
                                 <th scope="col">Name</th>
                                 <th scope="col">Quantity</th>

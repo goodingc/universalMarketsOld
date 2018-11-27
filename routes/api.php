@@ -70,13 +70,28 @@ Route::namespace("API")->middleware("auth:api")->group(function (){
         Route::delete("{id}", "ProductController@destroy")->name(".destroy");
         Route::prefix("{id}/attributes")->name(".attributes")->group(function (){
             Route::post("add", "ProductController@addAttribute")->name(".add");
+            //Route::get("{attrID}", "ProductController@getAttribute")->name(".get");
             Route::delete("{attrID}", "ProductController@removeAttribute")->name(".remove");
+            Route::post("{attrID}", "ProductController@editAttribute")->name(".edit");
+        });
+        Route::prefix("{id}/barcodes")->name(".barcodes")->group(function (){
+            Route::post("add", "ProductController@addBarcode")->name(".add");
+            Route::delete("{quantity}", "ProductController@removeBarcode")->name(".remove");
+            Route::post("{quantity}", "ProductController@aditBarcode")->name(".edit");
+        });
+        Route::prefix("{id}/inventory-bays")->name(".inventoryBays")->group(function (){
+            Route::post("add", "ProductController@addInventoryBay")->name(".add");
+            Route::delete("{quantity}", "ProductController@removeInventoryBay")->name(".remove");
+            Route::post("{quantity}", "ProductController@aditInventoryBay")->name(".edit");
         });
     });
 
     Route::prefix("product-attributes")->name("productAttributes")->group(function (){
         Route::get("", "ProductAttributeController@show")->name(".show");
         Route::get("create", "ProductAttributeController@create")->name(".create");
+        Route::get("{id}", "ProductAttributeController@get")->name(".get");
+        Route::post("{id}", "ProductAttributeController@edit")->name(".edit");
+        Route::delete("{id}", "ProductAttributeController@destroy")->name(".destroy");
     });
 
     Route::prefix("jobs")->name("jobs")->group(function (){

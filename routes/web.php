@@ -35,6 +35,12 @@ Route::prefix("products")->name("products")->middleware("auth")->middleware("aut
     Route::get("{id}/view", "ProductController@view")->name(".view");
 });
 
+Route::prefix("product-attributes")->name("productAttributes")->middleware("auth")->middleware("auth.api")->group(function (){
+    Route::get("", "ProductAttributeController@index")->name("");
+    Route::get("{id}", "ProductAttributeController@viewPreload")->name(".viewPreload");
+    Route::get("{id}/view", "ProductAttributeController@view")->name(".view");
+});
+
 Route::prefix("stock")->name("stock")->middleware(["auth", "auth.api"])->group(function (){
     Route::get("upload", "StockController@upload")->name(".upload");
 });

@@ -10,7 +10,16 @@ class Product extends Model{
     }
 
     get(onDone){
+        var that = this;
         super.get(function (data) {
+            that.product_attributes.forEach(function (attributeData, key) {
+                that.product_attributes[key] = new ProductAttribute(attributeData.id);
+                that.product_attributes[key].populate(attributeData);
+            });
+            that.barcodes.forEach(function (barcodeData, key) {
+                that.barcodes[key] = new ProductBarcode(barcodeData.id);
+                that.barcodes[key].populate(barcodeData);
+            });
             onDone(data);
         })
     }
@@ -18,7 +27,7 @@ class Product extends Model{
     static create(onDone){
         super.create("products", function (data) {
             var product = new Product(data.id);
-            product.data = data;
+            product.populate(data);
             onDone(product);
         })
     }
@@ -39,7 +48,7 @@ class Product extends Model{
                 data: data,
             }
         }).done(function (data) {
-            that.data = data;
+            that.populate(data);
             onDone(data);
         })
     }
@@ -53,8 +62,29 @@ class Product extends Model{
                 api_token: apiToken,
             }
         }).done(function (data) {
-            that.data = data;
+            that.populate(data);
             onDone(data);
         })
+    }
+
+    editAttribute(id, value, onDone){
+        var that = this;
+        $.ajax({
+            url: `/api/${this.endpoint}/${this.id}/attributes/${id}`,
+            method: "POST",
+            data: {
+                api_token: apiToken,
+                data:{
+                    value: value
+                }
+            }
+        }).done(function (data) {
+            that.populate(data);
+            onDone(data);
+        })
+    }
+
+    addBarcode(){
+
     }
 }

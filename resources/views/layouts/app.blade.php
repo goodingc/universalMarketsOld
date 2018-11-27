@@ -89,8 +89,12 @@
                         <li class="nav-item">
                             <a class="nav-link py-0" href="{{route("productRanges")}}">Product Ranges</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-0" href="{{route("products")}}">Products</a>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle py-0" data-toggle="dropdown">Products</a>
+                            <div class="dropdown-menu">
+                                <a href="{{route("products")}}" class="dropdown-item">Products</a>
+                                <a href="{{route("productAttributes")}}" class="dropdown-item">Product Attributes</a>
+                            </div>
                         </li>
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle py-0" data-toggle="dropdown">Stock</a>

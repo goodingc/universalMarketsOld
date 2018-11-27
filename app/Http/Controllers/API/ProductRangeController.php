@@ -31,8 +31,12 @@ class ProductRangeController extends Controller {
     public function edit(Request $request, int $id){
         $productRange = ProductRange::find($id);
         $data = $request->get("data");
-        $productRange->sku = $data["sku"];
-        $productRange->title = $data["title"];
+        $attributes = $productRange->attributesToArray();
+        foreach ($attributes as $attr => $value) {
+            if(isset($productRange->{$attr}) && $attr!="id"){
+                $productRange->{$attr} = $data[$attr];
+            }
+        }
         $productRange->save();
         $productRange->products;
         return $productRange;

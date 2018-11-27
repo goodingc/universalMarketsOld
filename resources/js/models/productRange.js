@@ -10,7 +10,12 @@ class ProductRange extends Model{
     }
 
     get(onDone){
+        var that = this;
         super.get(function (data) {
+            that.products.forEach(function (productData, key) {
+                that.products[key] = new Product(productData.id);
+                that.products[key].populate(productData);
+            })
             onDone(data);
         })
     }
@@ -18,7 +23,7 @@ class ProductRange extends Model{
     static create(onDone){
         super.create("product-ranges", function (data) {
             var productRange = new ProductRange(data.id);
-            productRange.data = data;
+            productRange.populate(data);
             onDone(productRange);
         })
     }

@@ -4,8 +4,10 @@ namespace App\Http\Controllers\API;
 
 use App\Models\Product;
 use App\Models\ProductAttribute;
+use App\Models\ProductBarcode;
 use App\Models\ProductRange;
 use App\Utils\Search;
+use Faker\Provider\Barcode;
 use function GuzzleHttp\Promise\queue;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -45,7 +47,9 @@ class ProductController extends Controller {
         $data = $request->get("data");
         $attributes = $product->attributesToArray();
         foreach ($attributes as $attr => $value) {
-            $product->{$attr} = $data[$attr];
+            if(isset($product->{$attr}) && $attr!="id"){
+                $product->{$attr} = $data[$attr];
+            }
         }
         $product->save();
         return $this->get($request, $id);
@@ -72,6 +76,28 @@ class ProductController extends Controller {
         $product = Product::find($id);
         $product->productAttributes()->detach($attrID);
         $product->save();
+        return $this->get($request, $id);
+    }
+
+    public function editAttribute(Request $request, int $id, int $attrID){
+        $product = Product::find($id);
+        $data = $request->get("data");
+        $product->productAttributes->where("id", $attrID)->first()->pivot->value = $data["value"];
+        $product->push();
+        return $this->get($request, $id);
+    }
+
+    public function addBarcode(Request $request, int $id){
+        $product = Product::find($id);
+        $data = $request->get("data");
+        $barcode = ProductBarcode::create();
+        $attributes = $barcode->attributesToArray();
+        foreach ($attributes as $attr => $value) {
+            if(isset($barcode->{$attr}) && $attr!="id"){
+                $barcode->{$attr} = $data[$attr];
+            }
+        }
+        $barcode->save();
         return $this->get($request, $id);
     }
 

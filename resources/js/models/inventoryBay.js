@@ -1,6 +1,6 @@
-class ProductAttribute extends Model{
+class InventoryBay extends Model{
     constructor(id){
-        super(id, "product-attributes");
+        super(id, "inventory-bays");
     }
 
     edit(onDone){
@@ -26,7 +26,7 @@ class ProductAttribute extends Model{
             var productAttributes = [];
             data.forEach(function (datum) {
                 var productAttribute = new ProductAttribute(datum.id);
-                productAttribute.populate(datum);
+                productAttribute.data = datum;
                 productAttributes.push(productAttribute);
             });
             onDone(productAttributes);
@@ -36,7 +36,7 @@ class ProductAttribute extends Model{
     static create(onDone){
         super.create("product-attributes", function (data) {
             var productAttribute = new ProductAttribute(data.id);
-            productAttribute.populate(datum);
+            productAttribute.data = data;
             onDone(productAttribute);
         })
     }

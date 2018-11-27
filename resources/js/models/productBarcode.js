@@ -1,6 +1,6 @@
-class ProductAttribute extends Model{
+class ProductBarcode extends Model{
     constructor(id){
-        super(id, "product-attributes");
+        super(id, "product-barcodes");
     }
 
     edit(onDone){
@@ -17,27 +17,27 @@ class ProductAttribute extends Model{
 
     static show(onDone){
         $.ajax({
-            url: `/api/product-attributes`,
+            url: `/api/product-barcodes`,
             method: "GET",
             data: {
                 api_token: apiToken,
             }
         }).done(function (data) {
-            var productAttributes = [];
+            var productBarcodes = [];
             data.forEach(function (datum) {
-                var productAttribute = new ProductAttribute(datum.id);
-                productAttribute.populate(datum);
-                productAttributes.push(productAttribute);
+                var productBarcode = new ProductBarcode(datum.id);
+                productBarcode.populate(datum);
+                productBarcodes.push(barcode);
             });
-            onDone(productAttributes);
+            onDone(productBarcodes);
         })
     }
 
     static create(onDone){
-        super.create("product-attributes", function (data) {
-            var productAttribute = new ProductAttribute(data.id);
-            productAttribute.populate(datum);
-            onDone(productAttribute);
+        super.create("product-barcodes", function (data) {
+            var productBarcode = new ProductBarcode(data.id);
+            productBarcode.populate(datum);
+            onDone(barcode);
         })
     }
 
