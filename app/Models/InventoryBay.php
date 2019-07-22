@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class InventoryBay extends Model {
     protected $table = "tbl_inventory_bays";
 
-    public function products(){
-        return $this->belongsToMany("App\Models\Product", "tbl_product_inventory_bays")->withPivot(Schema::getColumnListing("tbl_product_inventory_bays"));
+    protected $guarded = ["id"];
+
+    public function inventoryBayAssignments() {
+        return $this->hasMany("App\Models\InventoryBayAssignment");
     }
 
     public function warehouse(){

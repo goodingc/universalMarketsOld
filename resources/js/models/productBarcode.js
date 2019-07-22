@@ -1,49 +1,53 @@
-class ProductBarcode extends Model{
-    constructor(id){
-        super(id, "product-barcodes");
-    }
+var ProductBarcode = function (attributes) {
+    Model.call(this, attributes);
+};
 
-    edit(onDone){
-        super.edit(function (data) {
-            onDone(data);
-        })
-    }
+ProductBarcode.prototype = Object.create(Model.prototype);
+ProductBarcode.prototype.constructor = ProductBarcode;
+ProductBarcode.prototype.endpoint = "product-barcodes";
 
-    get(onDone){
-        super.get(function (data) {
-            onDone(data);
-        })
-    }
 
-    static show(onDone){
-        $.ajax({
-            url: `/api/product-barcodes`,
-            method: "GET",
-            data: {
-                api_token: apiToken,
-            }
-        }).done(function (data) {
-            var productBarcodes = [];
-            data.forEach(function (datum) {
-                var productBarcode = new ProductBarcode(datum.id);
-                productBarcode.populate(datum);
-                productBarcodes.push(barcode);
-            });
-            onDone(productBarcodes);
-        })
-    }
 
-    static create(onDone){
-        super.create("product-barcodes", function (data) {
-            var productBarcode = new ProductBarcode(data.id);
-            productBarcode.populate(datum);
-            onDone(barcode);
-        })
-    }
-
-    destroy(onDone){
-        super.destroy(function (data) {
-            onDone(data);
-        })
-    }
-}
+// class ProductBarcode extends Model{
+// //     constructor(id){
+// //         super("product-barcodes", id);
+// //     }
+// //
+// //     edit(onDone){
+// //         super.edit(function (data) {
+// //             onDone(data);
+// //         })
+// //     }
+// //
+// //     get(onDone){
+// //         super.get(function (data) {
+// //             onDone(data);
+// //         })
+// //     }
+// //
+// //     static show(attributes, onDone){
+// //         super.show("product-barcodes", attributes, function (data) {
+// //             var productBarcodes = [];
+// //             data.forEach(function (datum) {
+// //                 var productBarcode = new ProductBarcode(datum.id);
+// //                 productBarcode.populate(datum);
+// //                 productBarcodes.push(productBarcode);
+// //             });
+// //             onDone(productBarcodes);
+// //         })
+// //     }
+// //
+// //     static create(attributes, onDone){
+// //         super.create("product-barcodes",attributes, function (data) {
+// //             var barcode = new ProductBarcode(data.id);
+// //             barcode.populate(data);
+// //             onDone(barcode);
+// //         })
+// //     }
+// //
+// //     destroy(onDone){
+// //         super.destroy(function (data) {
+// //             onDone(data);
+// //         })
+// //     }
+// // }

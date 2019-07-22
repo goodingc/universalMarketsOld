@@ -4,10 +4,12 @@
     $(function () {
 
         $("a[href='#nav-attributes']").on("shown.bs.tab", () => tables.attributes.columns.adjust());
+        $("a[href='#nav-blocks']").on("shown.bs.tab", () => tables.blocks.columns.adjust());
         $("a[href='#nav-suppliers']").on("shown.bs.tab", () => tables.suppliers.columns.adjust());
         $("a[href='#nav-salesChannels']").on("shown.bs.tab", () => tables.salesChannels.columns.adjust());
         $("a[href='#nav-inventoryBays']").on("shown.bs.tab", () => tables.inventoryBays.columns.adjust());
         $("a[href='#nav-barcodes']").on("shown.bs.tab", () => tables.barcodes.columns.adjust());
+        $("a[href='#nav-groups']").on("shown.bs.tab", () => tables.groups.columns.adjust());
 
         var tableHeight = $(".card-hero > .card-body").height()-$(".breadcrumb").height()-$(".nav-tabs").height()-145;
 
@@ -18,20 +20,38 @@
                 responsive: true,
                 scrollY: tableHeight,
                 columns: [
-                    {data: "title"},
-                    {data: "pivot.value"},
+                    {data: "attribute.title"},
+                    {data: "value"},
                     {data: (row) => {
-                        return `<i id="attribute-${row.id}-delete" class="fas fa-minus-circle fa-lg text-danger"></i>
-                                <a tabindex="0" id="attribute-${row.id}-pop" data-toggle="popover" data-placement="top" data-html="true" data-content="
+                        return `<i id="attribute-${row.attribute.id}-delete" class="fas fa-minus-circle fa-lg text-danger"></i>
+                                <a tabindex="0" id="attribute-${row.attribute.id}-pop" data-toggle="popover" data-placement="top" data-html="true" data-content="
                                     <div class='input-group'>
-                                        <input id='attribute-${row.id}-value' type='text' placeholder='New value' value='${row.pivot.value}' class='form-control'>
+                                        <input id='attribute-${row.attribute.id}-value' type='text' placeholder='New value' value='${row.value}' class='form-control'>
                                         <div class='input-group-append'>
-                                            <button id='attribute-${row.id}-edit' class='btn btn-primary'>Save</button>
+                                            <button id='attribute-${row.attribute.id}-edit' class='btn btn-primary'>Save</button>
                                         </div>
                                     </div>
                                 " class="ml-auto text-danger"><i class="fas fa-edit fa-lg text-secondary"></i></a>`
                     },
                     width: 40,
+                    },
+                ],
+            }),
+            blocks: $("#blocksTable").DataTable({
+                paging:false,
+                searching: false,
+                responsive: true,
+                scrollY: tableHeight,
+                columns: [
+                    {data: "reason.reason"},
+                    {data: (row)=>{
+                        if(row.sales_channel_id == 0) return "All";
+                        return product.sales_channel_assignments.filter((assignment)=> row.sales_channel_id == assignment.sales_channel.id)[0].sales_channel.title;
+                    }},
+                    {data: (row) => {
+                            return `<i id="block-${row.reason_id}-${row.sales_channel_id}-delete" class="fas fa-minus-circle fa-lg text-danger"></i>`
+                        },
+                        width: 40,
                     },
                 ],
             }),
@@ -53,10 +73,10 @@
                 responsive: true,
                 scrollY: tableHeight,
                 columns: [
-                    {data: "id"},
-                    {data: "title"},
-                    {data: "pivot.sell_price_ex_vat"},
-                    {data: "pivot.default_margin_percent"},
+                    {data: "sales_channel.id"},
+                    {data: "sales_channel.title"},
+                    {data: "sell_price_ex_vat"},
+                    {data: "default_margin_percent"},
                 ],
             }),
             inventoryBays: $("#inventoryBaysTable").DataTable({
@@ -65,27 +85,76 @@
                 responsive: true,
                 scrollY: tableHeight,
                 columns: [
-                    {data: "id"},
-                    {data: "warehouse_id"},
-                    {data: "name"},
-                    {data: "pivot.quantity"},
+                    {data: "bay.warehouse.name"},
+                    {data: "bay.name"},
+                    {data: "quantity"},
+                    {data: (row) => {
+                            return `<i id="bay-${row.bay.id}-delete" class="fas fa-minus-circle fa-lg text-danger"></i>
+                                    <a tabindex="0" id="bay-${row.bay.id}-pop" data-toggle="popover" data-placement="top" data-html="true" data-content="
+                                        <div class='input-group'>
+                                            <input id='bay-${row.bay.id}-quantity' type='number' placeholder='New quantity' value='${row.quantity}' class='form-control'>
+                                            <div class='input-group-append'>
+                                                <button id='bay-${row.bay.id}-edit' class='btn btn-primary'>Save</button>
+                                            </div>
+                                        </div>
+                                    " class="ml-auto text-danger"><i class="fas fa-edit fa-lg text-secondary"></i></a>`
+                        },
+                        width: 40,
+                    },
                 ],
             }),
             barcodes: $("#barcodesTable").DataTable({
-                paging:false,
+                paging: false,
                 searching: false,
                 responsive: true,
                 scrollY: tableHeight,
                 columns: [
                     {data: "quantity"},
-                    {data: "barcode"},
+                    {data: "id"},
+                    {
+                        data: (row) => {
+                            return `<i id="barcode-${row.id}-delete" class="fas fa-minus-circle fa-lg text-danger"></i>
+                                    <a tabindex="0" id="barcode-${row.id}-pop" data-toggle="popover" data-placement="top" data-html="true" data-content="
+                                        <div class='input-group'>
+                                            <input id='barcode-${row.id}-quantity' type='number' placeholder='New quantity' value='${row.quantity}' class='form-control'>
+                                            <div class='input-group-append'>
+                                                <button id='barcode-${row.id}-edit' class='btn btn-primary'>Save</button>
+                                            </div>
+                                        </div>
+                                    " class="ml-auto text-danger"><i class="fas fa-edit fa-lg text-secondary"></i></a>`
+                        },
+                        width: 40,
+                    },
+                ],
+            }),
+                groups: $("#groupsTable").DataTable({
+                paging:false,
+                searching: false,
+                responsive: true,
+                scrollY: tableHeight,
+                columns: [
+                    {data: "product.title"},
+                    {data: "quantity"},
+                    {data: (row) => {
+                            return `<i id="group-${row.product.id}-delete" class="fas fa-minus-circle fa-lg text-danger"></i>
+                                    <a tabindex="0" id="group-${row.product.id}-pop" data-toggle="popover" data-placement="top" data-html="true" data-content="
+                                        <div class='input-group'>
+                                            <input id='group-${row.product.id}-quantity' type='number' placeholder='New quantity' value='${row.quantity}' class='form-control'>
+                                            <div class='input-group-append'>
+                                                <button id='group-${row.product.id}-edit' class='btn btn-primary'>Save</button>
+                                            </div>
+                                        </div>
+                                    " class="ml-auto text-danger"><i class="fas fa-edit fa-lg text-secondary"></i></a>`
+                        },
+                        width: 40,
+                    },
                 ],
             }),
         };
 
         tables.attributes.on("draw", function () {
             $("[id^=attribute][id$=delete]").on("click", function () {
-                product.removeAttribute($(this).attr("id").split("-")[1], (data) => populate(data))
+                product.removeAttribute($(this).attr("id").split("-")[1], () => populate(product))
             });
             $("[id^=attribute][id$=pop]").popover({
                 trigger: "click",
@@ -96,22 +165,117 @@
                 $(`#attribute-${id}-edit`).on("click", function () {
                     product.editAttribute(id, $(`#attribute-${id}-value`).val(), (data) => {
                         that.popover("hide");
-                        populate(data);
+                        populate(product)
                     });
-
                 })
             })
         });
 
-
-
-
-        ProductAttribute.show((attrs)=>{
-            var options;
-            attrs.forEach((attr)=>{
-                options += `<option value="${attr.id}">${attr.title}</option>`;
+        tables.blocks.on("draw", function () {
+            $("[id^=block][id$=delete]").on("click", function () {
+                var split = $(this).attr("id").split("-");
+                product.removeBlock(split[1], split[2], () => populate(product))
             });
-            $("#attributesTable_wrapper > .row > .col-sm-12.col-md-7").html(`
+        });
+
+        tables.inventoryBays.on("draw", function () {
+            $("[id^=bay][id$=delete]").on("click", function () {
+                var split = $(this).attr("id").split("-");
+                product.removeInventoryBayAssignment(split[1], () => populate(product))
+            });
+            $("[id^=bay][id$=pop]").popover({
+                trigger: "click",
+                boundary: "body"
+            }).on("shown.bs.popover", function () {
+                var that = $(this);
+                var id = $(this).attr("id").split("-")[1];
+                $(`#bay-${id}-edit`).on("click", function () {
+                    product.editInventoryBayAssignment(id, $(`#bay-${id}-quantity`).val(), (data) => {
+                        that.popover("hide");
+                        populate(product)
+                    });
+                })
+            })
+        });
+
+        tables.barcodes.on("draw", function () {
+            $("[id^=barcode][id$=delete]").on("click", function () {
+                var split = $(this).attr("id").split("-");
+                product.removeBarcode(split[1], () => populate(product))
+            });
+            $("[id^=barcode][id$=pop]").popover({
+                trigger: "click",
+                boundary: "body"
+            }).on("shown.bs.popover", function () {
+                var that = $(this);
+                var id = $(this).attr("id").split("-")[1];
+                $(`#barcode-${id}-edit`).on("click", function () {
+                    product.editBarcode(id, $(`#barcode-${id}-quantity`).val(), (data) => {
+                        that.popover("hide");
+                        populate(product)
+                    });
+                })
+            })
+        });
+
+        tables.groups.on("draw", function () {
+            $("[id^=group][id$=delete]").on("click", function () {
+                var split = $(this).attr("id").split("-");
+                product.removeGroup(split[1], () => populate(product))
+            });
+            $("[id^=group][id$=pop]").popover({
+                trigger: "click",
+                boundary: "body"
+            }).on("shown.bs.popover", function () {
+                var that = $(this);
+                var id = $(this).attr("id").split("-")[1];
+                $(`#group-${id}-edit`).on("click", function () {
+                    product.editGroup(id, $(`#group-${id}-quantity`).val(), (data) => {
+                        that.popover("hide");
+                        populate(product)
+                    });
+                })
+            })
+        });
+
+        product = new Product({{$product->id}});
+        product.get(() => populate(product));
+
+        function populate(data) {
+            $("#attributesTable_wrapper > .row > .col-sm-12.col-md-7").html("<div class='row justify-content-center mt-3 text-secondary'>Loading Options...</div>");
+            $("#blocksTable_wrapper > .row > .col-sm-12.col-md-7").html("<div class='row justify-content-center mt-3 text-secondary'>Loading Options...</div>");
+            $("#inventoryBaysTable_wrapper > .row > .col-sm-12.col-md-7").html("<div class='row justify-content-center mt-3 text-secondary'>Loading Options...</div>");
+            $("#idField").val(data.id);
+            $("#skuField").val(data.sku);
+            $("#skuBreadcrumb").html(data.sku);
+            $("#titleField").val(data.title);
+            $("#stockOnHandField").val(data.stockOnHand);
+            $("#supplierStockField").val(data.supplierStock);
+            $("#taxRateNameField").val(data.tax_rate.id || 0);
+            $("#taxRateValueField").html((data.tax_rate.tax_rate || 0) + "%");
+            $("#heightField").val(data.shipping_height);
+            $("#lengthField").val(data.shipping_length);
+            $("#widthField").val(data.shipping_width);
+            $("#shippingWeightField").val(data.shipping_weight_grams);
+            $("#largeLetterField").prop("checked", data.large_letter_compatible);
+            $("#packagingTypeField").val(data.packaging_type);
+            console.log(data);
+            for(var table in tables) {tables[table].clear();}
+            tables.attributes.rows.add(data.attribute_assignments);
+            tables.blocks.rows.add(data.blocks);
+            tables.suppliers.rows.add(data.suppliers);
+            tables.salesChannels.rows.add(data.sales_channel_assignments);
+            tables.inventoryBays.rows.add(data.inventory_bay_assignments);
+            tables.barcodes.rows.add(data.barcodes);
+            tables.groups.rows.add(data.child_groups);
+            for(var table in tables) {tables[table].draw()}
+
+            ProductAttribute.prototype.show(null, (attrs)=>{
+                var options;
+                attrs.forEach((attr)=>{
+                    options += `<option value="${attr.id}">${attr.title}</option>`;
+                });
+                $("#attributesTable_wrapper > .row > .col-sm-12.col-md-7").html(`
                 <div class="input-group mt-2">
                     <div class="input-group-prepend">
                         <select id="addAttributeSelect" class="custom-select form-control">
@@ -123,43 +287,112 @@
                         <button id="addAttributeTrigger" class="btn btn-primary">Add</button>
                     </div>
                 </div>
-            `);
-            $("#addAttributeTrigger").on("click", function () {
-                product.addAttribute({
-                    product_attribute_id: $("#addAttributeSelect").val(),
-                    value: $("#addAttributeValue").val()
-                }, (data) => populate(data))
+                `);
+                $("#addAttributeTrigger").on("click", function () {
+                    product.addAttribute( $("#addAttributeSelect").val(), $("#addAttributeValue").val(), (data) => populate(product));
+                })
+            });
+
+            ProductBlockReason.prototype.show(null, (reasons)=>{
+                var blockOptions;
+                reasons.forEach((reason)=>{
+                    blockOptions += `<option value="${reason.id}">${reason.reason}</option>`;
+                });
+                var channelOptions = "<option value=0>All</option>";
+                product.sales_channel_assignments.forEach((assignment)=>{
+                    channelOptions += `<option value="${assignment.sales_channel.id}">${assignment.sales_channel.title}</option>`;
+                });
+                $("#blocksTable_wrapper > .row > .col-sm-12.col-md-7").html(`
+                <div class="input-group mt-2">
+                    <div class="input-group-prepend">
+                        <select id="addBlockChannel" class="custom-select form-control">
+                            ${channelOptions}
+                        </select>
+                    </div>
+                    <select id="addBlockReason" class="custom-select form-control">
+                            ${blockOptions}
+                    </select>
+                    <div class="input-group-append">
+                        <button id="addBlockTrigger" class="btn btn-primary">Add</button>
+                    </div>
+                </div>`
+                );
+                $("#addBlockTrigger").on("click", function () {
+                    product.addBlock($("#addBlockReason").val(), $("#addBlockChannel").val(), (block)=>populate(product));
+                });
+            });
+
+            InventoryBay.prototype.show(null, (bays)=>{
+                let bayOptions;
+                bayOptions = bays.reduce((prevBays, bay)=>prevBays+`<option value="${bay.id}">${bay.name}@${bay.warehouse?bay.warehouse.name:"No warehouse"}</option>`);
+                $("#inventoryBaysTable_wrapper > .row > .col-sm-12.col-md-7").html(`
+                <div class="input-group mt-2">
+                    <div class="input-group-prepend">
+                        <select id="addBay" class="custom-select form-control">
+                            ${bayOptions}
+                        </select>
+                    </div>
+                    <input id="addBayQuantity" type="number" placeholder="Bay Quantity" class="form-control">
+                    <div class="input-group-append">
+                        <button id="addBayTrigger" class="btn btn-primary">Add</button>
+                    </div>
+                </div>`
+                );
+                $("#addBayTrigger").on("click", function () {
+                    product.addInventoryBayAssignment($("#addBay").val(), $("#addBayQuantity").val(), (bay)=>populate(product));
+                });
             })
+        }
+
+
+
+
+        $("#barcodesTable_wrapper > .row > .col-sm-12.col-md-7").html(`
+                <div class="input-group mt-2">
+                    <div class="input-group-prepend">
+                        <input id="addBarcodeID" placeholder="Barcode" type="number" class="form-control">
+                    </div>
+                    <input id="addBarcodeQuantity" placeholder="Product Quantity" type="number" class="form-control">
+                    <div class="input-group-append">
+                        <button id="addBarcodeTrigger" class="btn btn-primary">Add</button>
+                    </div>
+                </div>`
+        );
+        $("#addBarcodeTrigger").on("click", function () {
+            product.addBarcode($("#addBarcodeID").val(), $("#addBarcodeQuantity").val(), (barcode)=>populate(product));
         });
 
+        $("#groupsTable_wrapper > .row > .col-sm-12.col-md-7").html(`
+                <div class="input-group mt-2">
+                    <div class="input-group-prepend">
+                        <input id="addGroupSKU" placeholder="Product SKU" type="text" class="form-control">
+                    </div>
+                    <input id="addGroupQuantity" placeholder="Product Quantity" type="number" class="form-control">
+                    <div class="input-group-append">
+                        <button id="addGroupTrigger" disabled class="btn btn-primary">Add</button>
+                    </div>
+                </div>`
+        );
+        $("#addGroupSKU").on("change", function () {
+            if($(this).val() !== ""){
+                Product.prototype.show({sku: $(this).val()}, (data)=>{
+                    if(data.length === 1){
+                        $(this).addClass("bg-success");
+                        $("#addGroupTrigger").attr("disabled", false).on("click", function () {
+                            product.addGroup(data[0].id, $("#addGroupQuantity").val(), (group)=>populate(product));
+                        });
+                    }else {
+                        $(this).addClass("bg-danger");
+                        $("#addGroupTrigger").attr("disabled", true).off("click");
+                    }
+                })
+            }else{
+                $(this).removeClass("bg-success");
+                $(this).removeClass("bg-danger");
+                $("#addGroupTrigger").attr("disabled", true).off("click");
+            }
+        });
 
-
-        product = new Product({{$product->id}});
-        product.get((data) => populate(data));
-
-        function populate(data) {
-            $("#idField").val(data.id);
-            $("#skuField").val(data.sku);
-            $("#skuBreadcrumb").html(data.sku);
-            $("#titleField").val(data.title);
-            $("#stockOnHandField").val(data.stockOnHand);
-            $("#supplierStockField").val(data.supplierStock);
-            $("#taxRateNameField").val(data.tax_rate.id);
-            $("#taxRateValueField").html(data.tax_rate.tax_rate + "%");
-            $("#heightField").val(data.shipping_height);
-            $("#lengthField").val(data.shipping_length);
-            $("#widthField").val(data.shipping_width);
-            $("#largeLetterField").prop("checked", data.large_letter_compatible);
-            $("#packagingTypeField").val(data.packaging_type);
-            console.log(data);
-            for(var table in tables) {tables[table].clear();}
-            tables.attributes.rows.add(data.product_attributes);
-            tables.suppliers.rows.add(data.suppliers);
-            tables.salesChannels.rows.add(data.sales_channels);
-            tables.inventoryBays.rows.add(data.inventory_bays);
-            tables.barcodes.rows.add(data.barcodes);
-            for(var table in tables) {tables[table].draw()}
-        }
 
         var editors = {
             sku: new Editor({
@@ -167,35 +400,42 @@
                 trigger: $("#skuTrigger"),
             }).triggered(function (val) {
                 product.sku = val;
-                product.edit((data) => populate(data));
+                product.edit(() => populate(product));
             }),
             title: new Editor({
                 input: $("#titleField"),
                 trigger: $("#titleTrigger"),
             }).triggered(function (val) {
                 product.title = val;
-                product.edit((data) => populate(data));
+                product.edit(() => populate(product));
             }),
             taxRate: new Editor({
                 input: $("#taxRateNameField"),
                 trigger: $("#taxRateTrigger"),
             }).triggered(function (val) {
                 product.tax_rate_id = val;
-                product.edit((data) => populate(data));
+                product.edit(() => populate(product));
             }),
             largeLetter: new Editor({
                 input: $("#largeLetterField"),
                 trigger: $("#largeLetterTrigger"),
             }).triggered(function (val) {
                 product.large_letter_compatible = $("#largeLetterField").is(":checked")?1:0;
-                product.edit((data) => populate(data));
+                product.edit(() => populate(product));
             }),
             packagingType: new Editor({
                 input: $("#packagingTypeField"),
                 trigger: $("#packagingTypeTrigger"),
             }).triggered(function (val) {
                 product.packaging_type = val;
-                product.edit((data) => populate(data));
+                product.edit(() => populate(product));
+            }),
+            shippingWeight: new Editor({
+                input: $("#shippingWeightField"),
+                trigger: $("#shippingWeightTrigger"),
+            }).triggered(function (val) {
+                product.shipping_weight_grams = val;
+                product.edit(() => populate(product));
             })
         };
 
@@ -210,14 +450,14 @@
             boundary: "body"
         }).on("shown.bs.popover", function () {
             $("#deleteTrigger").on("click", function () {
-                if ($("#deleteConfirm").val() == product.data.sku) {
+                if ($("#deleteConfirm").val() == product.sku) {
                     product.destroy(function () {
                         window.location = "/products";
-                    })
+                    });
                 }
-            })
-        })
-    })
+            });
+        });
+    });
 
 </script>
 
@@ -244,10 +484,12 @@
                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                     <a class="nav-item nav-link active" data-toggle="tab" href="#nav-details" role="tab">Details</a>
                     <a class="nav-item nav-link" data-toggle="tab" href="#nav-attributes" role="tab">Attributes</a>
+                    <a class="nav-item nav-link" data-toggle="tab" href="#nav-blocks" role="tab">Product Blocks</a>
                     <a class="nav-item nav-link" data-toggle="tab" href="#nav-suppliers" role="tab">Suppliers</a>
                     <a class="nav-item nav-link" data-toggle="tab" href="#nav-salesChannels" role="tab">Sales Channels</a>
                     <a class="nav-item nav-link" data-toggle="tab" href="#nav-inventoryBays" role="tab">Inventory Bays</a>
                     <a class="nav-item nav-link" data-toggle="tab" href="#nav-barcodes" role="tab">Barcodes</a>
+                    <a class="nav-item nav-link" data-toggle="tab" href="#nav-groups" role="tab">Groups</a>
                 </div>
             </div>
         </div>
@@ -346,6 +588,18 @@
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="input-group mt-2">
+                                            <div class="input-group-prepend"><span class="input-group-text">Shipping Weight</span>
+                                            </div>
+                                            <input id="shippingWeightField" disabled type="text" class="form-control">
+                                            <div class="input-group-append">
+                                                <button id="shippingWeightTrigger" class="btn">Edit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="input-group mt-2">
                                             <div class="input-group-prepend"><span class="input-group-text">Large Letter Compatible</span>
                                             </div>
                                             <input id="largeLetterField" disabled type="checkbox" class="form-control">
@@ -398,6 +652,19 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="tab-pane fade" id="nav-blocks" role="tabpanel">
+                        <table id="blocksTable" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">Reason</th>
+                                <th scope="col">Sales Channel</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                     <div class="tab-pane fade" id="nav-suppliers" role="tabpanel">
                         <table id="suppliersTable" class="table table-striped">
                             <thead>
@@ -430,10 +697,10 @@
                         <table id="inventoryBaysTable" class="table table-striped">
                             <thead>
                             <tr>
-                                <th scope="col">ID</th>
                                 <th scope="col">Warehouse</th>
-                                <th scope="col">Name</th>
+                                <th scope="col">Bay</th>
                                 <th scope="col">Quantity</th>
+                                <th scope="col">Action</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -446,6 +713,20 @@
                             <tr>
                                 <th scope="col">Quantity</th>
                                 <th scope="col">Barcode</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="nav-groups" role="tabpanel">
+                        <table id="groupsTable" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">Child</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Action</th>
                             </tr>
                             </thead>
                             <tbody>

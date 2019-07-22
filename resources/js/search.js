@@ -22,7 +22,7 @@ class Search {
             var filter = {
                 id: (Math.random()*0xFFFFFF<<0).toString(16),
                 type: that.filterTypeSelect.val(),
-                content: that.filterContent.val(),
+                content: "%"+that.filterContent.val()+"%",
             };
             that.filters.push(filter);
             that.onFilterAdd(filter);

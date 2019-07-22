@@ -108,7 +108,9 @@
                         <li class="nav-item">
                             <a class="nav-link py-0" href="{{route("tests")}}">Tests</a>
                         </li>
-
+                        <li class="nav-item">
+                            <a class="nav-link py-0" href="{{route("testSearch")}}">Test Search</a>
+                        </li>
                     </ul>
                 </div>
 

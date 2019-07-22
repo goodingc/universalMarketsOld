@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 
-class ProductRangeController extends Controller {
+class ProductRangeController extends ModelController {
+    protected $modelClass = ProductRange::class;
+
     public function search(Request $request){
         $search = new Search([
             [
@@ -22,33 +24,8 @@ class ProductRangeController extends Controller {
         return $search->searchWith($request->get("filters"));
     }
 
-    public function get(Request $request, int $id){
-        $productRange = ProductRange::find($id);
+    public function populate($productRange) {
         $productRange->products;
-        return $productRange;
-    }
-
-    public function edit(Request $request, int $id){
-        $productRange = ProductRange::find($id);
-        $data = $request->get("data");
-        $attributes = $productRange->attributesToArray();
-        foreach ($attributes as $attr => $value) {
-            if(isset($productRange->{$attr}) && $attr!="id"){
-                $productRange->{$attr} = $data[$attr];
-            }
-        }
-        $productRange->save();
-        $productRange->products;
-        return $productRange;
-    }
-
-    public function create(Request $request){
-        $productRange = ProductRange::create();
-        return $productRange;
-    }
-
-    public function destroy(Request $request, int $id){
-        ProductRange::destroy($id);
     }
 
 

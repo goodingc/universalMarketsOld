@@ -34,9 +34,9 @@ class StockFeed implements ShouldQueue {
         $feedId = "RETAIL_FEED_{$this->vendorCode}_".date("Ymd")."_00.TXT";
         Log::channel("daily")->info("Starting StockFeed Job with output {$feedId}");
         $this->setOutput(["stockFeedFile" => $feedId]);
-        $products = DB::select(DB::raw(/** @lang SQL */"CALL STOCK_FEED(?);"),[$this->vendorCode]);
+        $products = DB::select(DB::raw(/** @lang SQL */"CALL STOCK_FEED_2(?);"),[$this->vendorCode]);
         $this->setProgressMax(sizeof($products));
-        Storage::disk("bannanTools")->put("stockFeeds/".$feedId,"ISBN|EAN|UPC|VENDOR_STOCK_ID|TITLE|QTY_ON_HAND|LIST_PRICE_EXCL_TAX|LIST_PRICE_INCL_TAX|COST_PRICE|DISCOUNT|ISO_CURRENCY_CODE");
+        //Storage::disk("bannanTools")->put("stockFeeds/".$feedId,"ISBN|EAN|UPC|VENDOR_STOCK_ID|TITLE|QTY_ON_HAND|LIST_PRICE_EXCL_TAX|LIST_PRICE_INCL_TAX|COST_PRICE|DISCOUNT|ISO_CURRENCY_CODE");
         Storage::disk("local")->put("stockFeeds/".$feedId,"ISBN|EAN|UPC|VENDOR_STOCK_ID|TITLE|QTY_ON_HAND|LIST_PRICE_EXCL_TAX|LIST_PRICE_INCL_TAX|COST_PRICE|DISCOUNT|ISO_CURRENCY_CODE");
         $flushMax = 100;
         $flush = 0;
@@ -45,7 +45,7 @@ class StockFeed implements ShouldQueue {
             $buffer.= "|{$product->barcode}||{$product->sku}|{$product->title}|{$product->stock_level}|||{$product->cost_price}||GBP\n";
 
             if(++$flush == $flushMax){
-                Storage::disk("bannanTools")->append("stockFeeds/".$feedId, rtrim($buffer));
+                //Storage::disk("bannanTools")->append("stockFeeds/".$feedId, rtrim($buffer));
                 Storage::disk("local")->append("stockFeeds/".$feedId, rtrim($buffer));
                 $buffer = "";
                 $flush = 0;

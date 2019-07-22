@@ -32,6 +32,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule) {
         $schedule->command("stock:feed UNN42")->daily();
+        $schedule->command("stock:feed L4R3I")->daily();
+        $schedule->command("stock:feed 5C8M0")->daily();
     }
 
     /**

@@ -9,28 +9,34 @@ use Illuminate\Support\Facades\Schema;
 class Product extends Model {
     protected $table = "tbl_products";
 
+    protected $guarded = ['id'];
+
+    protected $casts = ["large_letter_compatible" => "boolean"];
+
     public function range() {
         return $this->belongsTo("App\Models\ProductRange", "product_range_id", "id");
     }
 
-    public function productAttributes() {
-        return $this->belongsToMany("App\Models\ProductAttribute", "tbl_product_attribute_values")->withPivot(Schema::getColumnListing("tbl_product_attribute_values"));
+    public function attributeAssignments() {
+        return $this->hasMany(ProductAttributeAssignment::class);
     }
 
     public function suppliers() {
         return $this->belongsToMany("App\Models\Supplier", "tbl_product_suppliers")->withPivot(Schema::getColumnListing("tbl_product_suppliers"));
     }
 
-    public function salesChannels() {
-        return $this->belongsToMany("App\Models\SalesChannel", "tbl_product_sales_channels")->withPivot(Schema::getColumnListing("tbl_product_sales_channels"));
+    public function salesChannelAssignments() {
+        return $this->hasMany(SalesChannelAssignment::class);
     }
 
-    public function inventoryBays(){
-        return $this->belongsToMany("App\Models\InventoryBay", "tbl_product_inventory_bays")->withPivot(Schema::getColumnListing("tbl_product_inventory_bays"));
+    public function inventoryBayAssignments(){
+        return $this->hasMany("App\Models\InventoryBayAssignment");
+        //return $this->belongsToMany("App\Models\InventoryBay", "tbl_product_inventory_bays")->withPivot(Schema::getColumnListing("tbl_product_inventory_bays"));
     }
 
     public function blocks(){
         return $this->hasMany("App\Models\ProductBlock");
+        //return $this->belongsToMany("App\Models\ProductBlockReason", "tbl_blocked_products", "product_id", "reason_id")->withPivot(Schema::getColumnListing("tbl_blocked_products"));
     }
 
     public function barcodes(){
@@ -41,9 +47,14 @@ class Product extends Model {
         return $this->belongsTo("App\Models\TaxRate");
     }
 
+    public function childGroups() {
+        return $this->hasMany("App\Models\ProductGroup", "parent_id");
+    }
+
     public function attribute(string $key){
-        if($entry = $this->productAttributes->where("title", "=" , $key)->first()){
-            return $entry->pivot->value;
+        $attrID = ProductAttribute::where(["title"=>$key])->first()->id;
+        if($entry = $this->attributeAssignments->where("product_attribute_id", "=" , $attrID)->first()){
+            return $entry->value;
         }
         return false;
     }
@@ -80,8 +91,8 @@ class Product extends Model {
             return 0;
         }
         $stockLevel = 0;
-        foreach ($this->inventoryBays as $inventoryBay) {
-            $stockLevel += $inventoryBay->pivot->quantity;
+        foreach ($this->inventoryBayAssignments as $assignment) {
+            $stockLevel += $assignment->quantity;
         }
         return $stockLevel;
     }

@@ -54,45 +54,21 @@ Route::namespace("API")->middleware("auth:api")->group(function (){
         });
     });
 
-    Route::prefix("product-ranges")->name("productRanges")->group(function (){
-        Route::get("search", "ProductRangeController@search")->name(".search");
-        Route::get("create", "ProductRangeController@create")->name(".create");
-        Route::get("{id}", "ProductRangeController@get")->name(".get");
-        Route::post("{id}", "ProductRangeController@edit")->name(".edit");
-        Route::delete("{id}", "ProductRangeController@destroy")->name(".destroy");
+    modelControllerRoutes("product-groups", "productRanges", "ProductRangeController", function ($controller){
+        Route::get("search", $controller."@search")->name(".search");
     });
-
-    Route::prefix("products")->name("products")->group(function (){
-        Route::get("search", "ProductController@search")->name(".search");
-        Route::get("create", "ProductController@create")->name(".create");
-        Route::get("{id}", "ProductController@get")->name(".get");
-        Route::post("{id}", "ProductController@edit")->name(".edit");
-        Route::delete("{id}", "ProductController@destroy")->name(".destroy");
-        Route::prefix("{id}/attributes")->name(".attributes")->group(function (){
-            Route::post("add", "ProductController@addAttribute")->name(".add");
-            //Route::get("{attrID}", "ProductController@getAttribute")->name(".get");
-            Route::delete("{attrID}", "ProductController@removeAttribute")->name(".remove");
-            Route::post("{attrID}", "ProductController@editAttribute")->name(".edit");
-        });
-        Route::prefix("{id}/barcodes")->name(".barcodes")->group(function (){
-            Route::post("add", "ProductController@addBarcode")->name(".add");
-            Route::delete("{quantity}", "ProductController@removeBarcode")->name(".remove");
-            Route::post("{quantity}", "ProductController@aditBarcode")->name(".edit");
-        });
-        Route::prefix("{id}/inventory-bays")->name(".inventoryBays")->group(function (){
-            Route::post("add", "ProductController@addInventoryBay")->name(".add");
-            Route::delete("{quantity}", "ProductController@removeInventoryBay")->name(".remove");
-            Route::post("{quantity}", "ProductController@aditInventoryBay")->name(".edit");
-        });
+    modelControllerRoutes("products", "products", "ProductController", function ($controller){
+        Route::get("search", $controller."@search")->name(".search");
     });
-
-    Route::prefix("product-attributes")->name("productAttributes")->group(function (){
-        Route::get("", "ProductAttributeController@show")->name(".show");
-        Route::get("create", "ProductAttributeController@create")->name(".create");
-        Route::get("{id}", "ProductAttributeController@get")->name(".get");
-        Route::post("{id}", "ProductAttributeController@edit")->name(".edit");
-        Route::delete("{id}", "ProductAttributeController@destroy")->name(".destroy");
-    });
+    modelControllerRoutes("product-attribute-assignments", "productAttributeAssignments", "ProductAttributeAssignmentController");
+    modelControllerRoutes("inventory-bay/assignments", "inventoryBayAssignments", "InventoryBayAssignmentController");
+    modelControllerRoutes("product-groups", "productGroups", "ProductGroupController");
+    modelControllerRoutes("product-attributes", "productAttributes", "ProductAttributeController");
+    modelControllerRoutes("inventory-bays", "inventoryBays", "InventoryBayController");
+    modelControllerRoutes("product-barcodes", "productBarcodes", "ProductBarcodeController");
+    modelControllerRoutes("product-blocks", "productBlocks", "ProductBlockController");
+    modelControllerRoutes("product-block-reasons", "productBlockReasons", "ProductBlockReasonController");
+    modelControllerRoutes("sales-channel-assignments", "salesChannelAssignments", "SalesChannelAssignmentController");
 
     Route::prefix("jobs")->name("jobs")->group(function (){
         Route::post("upload", "JobController@upload")->name(".upload");
@@ -103,3 +79,14 @@ Route::namespace("API")->middleware("auth:api")->group(function (){
     });
 });
 
+function modelControllerRoutes(string $prefix, string $name, string $controller, Closure $customRoutes = null){
+    Route::prefix($prefix)->name($name)->group(function () use ($controller, $customRoutes){
+        Route::get("show", $controller."@show")->name(".show");
+        Route::post("create", $controller."@create")->name(".create");
+        Route::get("", $controller."@get")->name(".get");
+        Route::post("", $controller."@edit")->name(".edit");
+        Route::delete("", $controller."@destroy")->name(".destroy");
+        Route::get("attributes", $controller."@attributes")->name(".attributes");
+        if($customRoutes != null) $customRoutes($controller);
+    });
+}

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Schema;
 class SalesChannel extends Model {
     protected $table = "tbl_sales_channels";
 
+    protected $guarded = ["id"];
+
     public function products(){
         return $this->belongsToMany("App\Models\Product", "tbl_product_sales_channels")->withPivot(Schema::getColumnListing("tbl_product_sales_channels"));
     }

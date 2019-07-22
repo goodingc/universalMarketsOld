@@ -48,3 +48,7 @@ Route::prefix("stock")->name("stock")->middleware(["auth", "auth.api"])->group(f
 Route::prefix("jobs")->name("jobs")->middleware(["auth", "auth.api"])->group(function (){
     Route::get("", "JobController@index")->name("");
 });
+
+Route::get("/test-search", function (){
+    return view("testSearch");
+})->name("testSearch");

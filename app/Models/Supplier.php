@@ -8,6 +8,8 @@ use phpDocumentor\Reflection\Types\This;
 class Supplier extends Model {
     protected $table = "tbl_suppliers";
 
+    protected $guarded = ["id"];
+
     public function products(){
         return $this->belongsToMany("App\Models\Product", "tbl_product_suppliers")->withPivot(Schema::getColumnListing("tbl_product_suppliers"));
     }
